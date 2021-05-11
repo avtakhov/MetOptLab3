@@ -39,7 +39,7 @@ private:
 
     friend std::istream& operator>>(std::istream&, profile&);
 
-    friend std::ostream& operator>>(std::ostream&, profile const&);
+    friend std::ostream& operator<<(std::ostream&, profile const&);
 
     template <typename Profile>
     friend struct profile_block;
@@ -116,8 +116,6 @@ private:
     profile<matrix_t::real_t> rows;
 
     profile<matrix_t::real_t> columns;
-
-    std::vector<size_t> column_separators;
 
     friend std::istream& operator>>(std::istream&, profile_matrix&);
 

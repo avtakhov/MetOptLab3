@@ -5,9 +5,7 @@
 #include <iostream>
 #include <cassert>
 
-profile_matrix::profile_matrix()
-{
-}
+profile_matrix::profile_matrix() = default;
 
 size_t profile_matrix::size() const
 {
@@ -46,17 +44,14 @@ void copy_to(std::ostream& os, Collection const& collecion)
 
 std::istream& operator>>(std::istream& is, profile_matrix& matrix)
 {
-    size_t size, nrows, ncolumns;
-    is >> size >> nrows >> ncolumns;
-    copy_from(is, size, matrix.diag);
-    copy_from(is, size, matrix.column_separators);
+    // TODO
     return is;
 }
 
 std::ostream& operator<<(std::ostream& os, profile_matrix const& matrix)
 {
     copy_to(os, matrix.diag);
-    copy_to(os, matrix.column_separators);
+    // TODO
     return os;
 }
 
@@ -69,7 +64,7 @@ std::optional<std::reference_wrapper<profile_matrix::real_t>> profile_matrix::ge
     }
     else if (column < row)
     {
-        auto size = std::distance(rows[row].begin(), rows[row].end());
+        size_t size = std::distance(rows[row].begin(), rows[row].end());
         if (column < row - size)
         {
             return std::nullopt;
@@ -81,7 +76,7 @@ std::optional<std::reference_wrapper<profile_matrix::real_t>> profile_matrix::ge
     }
     else
     {
-        auto size = std::distance(columns[column].begin(), columns[column].end());
+        size_t size = std::distance(columns[column].begin(), columns[column].end());
         if (row < column - size)
         {
             return std::nullopt;
