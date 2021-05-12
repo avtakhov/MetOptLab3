@@ -1,51 +1,42 @@
+#include "test_generator.h"
+#include "matrix.h"
+#include "vector_matrix.h"
 #include "profile.h"
 
 #include <iostream>
 #include <algorithm>
 #include <vector>
-
-
+#include <cassert>
+#include <filesystem>
+#include <fstream>
+#include <random>
+#include <iterator>
 
 int main()
 {
-    std::vector<std::vector<double>> a = {std::vector<double>({1, 2, 3}),std::vector<double>({4, 5, 6}), std::vector<double>({7, 8, 9})};
-    vector_matrix vm(a);
-    profile_matrix pm(vm);
-    for (int i = 0; i < 3; ++i)
+    auto gen = std::mt19937(std::random_device()());
+    uint TEST_CNT = 4;
+    namespace fs = std::filesystem;
+    for (uint i = 1; i <= TEST_CNT; ++i)
     {
-        for (int j = 0; j < 3; ++j)
+        fs::path path = fs::current_path().append("Test" + std::to_string(i));
+        fs::path input_file = path/"input.txt";
+        fs::create_directory(path);
         {
-            std::cout << pm.get(i, j) << " ";
+            std::ofstream os(input_file);
+            generate_one(os, gen, 20);
         }
-        std::cout << std::endl;
+
+        std::ifstream in(input_file);
+        profile_matrix pm;
+        in >> pm;
+        profile_matrix pm_copy(pm);
+        auto[l, u] = LU(pm);
+        std::ofstream out(path/"output.txt");
+        out << pm << std::endl;
+        std::cout << *l * *u << std::endl;
+        std::cout << vector_matrix(pm_copy) << std::endl << std::endl;
     }
-
-
-    std::cout << std::endl;
-
-    auto[l, u] = LU(std::move(pm));
-
-    for (int i = 0; i < 3; ++i)
-    {
-        for (int j = 0; j < 3; ++j)
-        {
-            std::cout << l->get(i, j) << " ";
-        }
-        std::cout << std::endl;
-    }
-
-
-    std::cout << std::endl;
-
-    for (int i = 0; i < 3; ++i)
-    {
-        for (int j = 0; j < 3; ++j)
-        {
-            std::cout << u->get(i, j) << " ";
-        }
-        std::cout << std::endl;
-    }
-
 }
 
 /*

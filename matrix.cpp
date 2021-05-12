@@ -1,32 +1,39 @@
 #include "matrix.h"
 
-matrix_t::real_t vector_matrix::get(size_t i, size_t j) const
+bool operator==(matrix_t const& a, matrix_t const& b)
 {
-    return values[i][j];
-}
-
-size_t vector_matrix::ncolumns() const
-{
-    return values.size() > 0 ? values[0].size() : 0;
-}
-
-size_t vector_matrix::nrows() const
-{
-    return values.size();
-}
-
-vector_matrix::vector_matrix(matrix_t const& other)
-    : values(other.nrows(), std::vector<matrix_t::real_t>(other.ncolumns()))
-{
-    for (size_t i = 0; i < other.nrows(); ++i)
+    if (a.nrows() != b.nrows() || a.ncolumns() != b.ncolumns())
     {
-        for (size_t j = 0; j < other.ncolumns(); ++j)
+        return false;
+    }
+    for (size_t i = 0; i < a.nrows(); ++i)
+    {
+        for (size_t j = 0; j < a.ncolumns(); ++j)
         {
-            values[i][j] = other.get(i , j);
+            if (a.get(i, j) != b.get(i, j))
+            {
+                return false;
+            }
         }
     }
+    return true;
 }
 
-vector_matrix::vector_matrix(std::vector<std::vector<matrix_t::real_t>> const& values)
-    : values(values)
-{}
+bool operator!=(matrix_t const& a, matrix_t const& b)
+{
+    return !(a == b);
+}
+
+
+std::ostream& operator<<(std::ostream& os, matrix_t const& m)
+{
+    for (size_t i = 0; i < m.nrows(); ++i)
+    {
+        for (size_t j = 0; j < m.ncolumns(); ++j)
+        {
+            os << m.get(i, j) << " ";
+        }
+        os << std::endl;
+    }
+    return os;
+}

@@ -15,7 +15,7 @@ struct LU : public matrix_t
 
     size_t ncolumns() const override;
 
-    matrix_t::real_t get(size_t, size_t) const override = 0;
+    matrix_t::value_type get(size_t, size_t) const override = 0;
 protected:
     std::shared_ptr<profile_matrix> matrix;
 };
@@ -26,7 +26,7 @@ struct L : public LU
         : LU(matrix)
     {}
 
-    matrix_t::real_t get(size_t i, size_t j) const override;
+    matrix_t::value_type get(size_t i, size_t j) const override;
 };
 
 struct U : public LU
@@ -35,7 +35,9 @@ struct U : public LU
         : LU(matrix)
     {}
 
-    matrix_t::real_t get(size_t i, size_t j) const override;
+    matrix_t::value_type get(size_t i, size_t j) const override;
 };
+
+std::pair<std::unique_ptr<matrix_t>, std::unique_ptr<matrix_t>> LU(profile_matrix&);
 
 #endif // LU_H

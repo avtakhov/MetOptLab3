@@ -2,13 +2,13 @@
 #define MATRIX_H
 
 #include <cstdio>
-#include <vector>
+#include <ostream>
 
 struct matrix_t
 {
-    using real_t = double;
+    using value_type = double;
 
-    virtual real_t get(size_t, size_t) const = 0;
+    virtual value_type get(size_t, size_t) const = 0;
 
     virtual size_t nrows() const = 0;
 
@@ -17,22 +17,9 @@ struct matrix_t
     virtual ~matrix_t() = default;
 };
 
-struct vector_matrix : public matrix_t
-{
-    real_t get(size_t i, size_t j) const override;
+bool operator==(matrix_t const&, matrix_t const&);
 
-    size_t nrows() const override;
+bool operator!=(matrix_t const&, matrix_t const&);
 
-    size_t ncolumns() const override;
-
-    vector_matrix(matrix_t const& other);
-
-    vector_matrix(std::vector<std::vector<real_t>> const& values);
-
-    ~vector_matrix() override = default;
-
-private:
-    std::vector<std::vector<real_t>> values;
-};
-
+std::ostream& operator<<(std::ostream&, matrix_t const&);
 #endif // MATRIX_H

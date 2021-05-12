@@ -8,32 +8,28 @@
 #include <functional>
 #include <memory>
 
+struct profile_matrix;
+
 template <typename Profile>
 struct profile_block;
 
-template <typename T>
 struct profile
 {
-    using value_type = T;
+    using value_type = matrix_t::value_type;
 
-    profile(std::vector<T> values, std::vector<size_t> separators)
+    profile(std::vector<value_type> values, std::vector<size_t> separators)
         : values(std::move(values))
         , separators(std::move(separators))
     {}
 
     profile() = default;
 
-    profile_block<profile> operator[](size_t index)
-    {
-        return profile_block<profile>(index, *this);
-    }
+    profile_block<profile> operator[](size_t index);
 
-    profile_block<profile const> operator[](size_t index) const
-    {
-        return profile_block<profile const>(index, *this);
-    }
+    profile_block<profile const> operator[](size_t index) const;
+
 private:
-    std::vector<T> values;
+    std::vector<value_type> values;
 
     std::vector<size_t> separators;
 
@@ -41,9 +37,12 @@ private:
 
     friend std::ostream& operator<<(std::ostream&, profile const&);
 
+    friend std::istream& operator>>(std::istream&, profile_matrix&);
+
+    friend std::ostream& operator<<(std::ostream&, profile_matrix const&);
+
     template <typename Profile>
     friend struct profile_block;
-
 };
 
 template <typename Profile>
@@ -51,35 +50,31 @@ struct profile_block
 {
     using value_type = typename Profile::value_type;
 
-    using iterator = typename std::vector<value_type>::iterator;
-
-    using const_iterator = typename std::vector<value_type>::const_iterator;
-
     profile_block(size_t index, Profile& profile_ref)
         : index(index)
         , profile_ref(profile_ref)
     {}
 
-    iterator begin()
+    auto begin()
     {
         Profile& p = profile_ref.get();
         return std::next(p.values.begin(), index == 0 ? 0 : p.separators[index - 1]);
     }
 
-    iterator end()
+    auto end()
     {
         Profile& p = profile_ref.get();
-        return index + 1 == p.values.size() ? p.values.end() : p[index + 1].begin();
+        return index + 1 == p.separators.size() ? p.values.end() : p[index + 1].begin();
     }
 
-    const_iterator begin() const
+    auto begin() const
     {
-        return const_cast<profile<Profile>>(this)->begin();
+        return const_iterator(const_cast<profile_block*>(this)->begin());
     }
 
-    const_iterator end() const
+    auto end() const
     {
-        return const_cast<profile<Profile>>(this)->end();
+        return const_iterator(const_cast<profile_block*>(this)->end());
     }
 
 private:
@@ -98,7 +93,7 @@ struct profile_matrix : public matrix_t
 
     size_t size() const;
 
-    matrix_t::real_t get(size_t, size_t) const override;
+    value_type get(size_t, size_t) const override;
 
     size_t nrows() const override;
 
@@ -106,16 +101,16 @@ struct profile_matrix : public matrix_t
 
     ~profile_matrix() = default;
 
-    friend std::pair<std::unique_ptr<matrix_t>, std::unique_ptr<matrix_t>> LU(profile_matrix&&);
+    friend std::pair<std::unique_ptr<matrix_t>, std::unique_ptr<matrix_t>> LU(profile_matrix&);
 
 private:
-    std::optional<std::reference_wrapper<matrix_t::real_t>> get_reference(size_t, size_t);
+    std::optional<std::reference_wrapper<matrix_t::value_type>> get_reference(size_t, size_t);
 
-    std::vector<real_t> diag;
+    std::vector<value_type> diag;
 
-    profile<matrix_t::real_t> rows;
+    profile rows;
 
-    profile<matrix_t::real_t> columns;
+    profile columns;
 
     friend std::istream& operator>>(std::istream&, profile_matrix&);
 
